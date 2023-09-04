@@ -1,7 +1,6 @@
 use std::env;
 use std::path::Path;
 use std::process::Command;
-use git2::Repository;
 
 fn main() {
     // move to config file later
