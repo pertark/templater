@@ -2,6 +2,18 @@ use std::env;
 use std::path::Path;
 use std::process::Command;
 
+#[cfg(target_os="windows")]
+fn get_config_dir() -> String {
+    let config_dir = env::var("LOCALAPPDATA").unwrap();
+    config_dir
+}
+
+#[cfg(target_os="linux")]
+fn get_config_dir() -> String {
+    let config_dir = env::var("XDG_CONFIG_HOME").unwrap_or(format!("{}/.config", env::var("HOME").unwrap()));
+    config_dir
+}
+
 fn main() {
     // move to config file later
     let url = "https://github.com/pertark/templates";
@@ -10,9 +22,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     // get config dir
-    // let config_dir = env::var("XDG_CONFIG_HOME").unwrap_or(format!("{}/.config", env::var("HOME").unwrap()));
-    // linux users get screwed for now
-    let config_dir = env::var("LOCALAPPDATA").unwrap();
+    let config_dir = get_config_dir();
     let config_dir = Path::new(&config_dir);
     let config_dir = config_dir.join("templater");
 
