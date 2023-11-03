@@ -15,8 +15,8 @@ fn get_config_dir() -> String {
 }
 
 fn main() {
-    // move to config file later
-    let url = "https://github.com/pertark/templates";
+    // better config file later
+    let url = include_str!("template_url");
 
     // replace with something more sophisticated later
     let args: Vec<String> = env::args().collect();
