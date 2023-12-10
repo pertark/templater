@@ -45,6 +45,11 @@ fn main() {
         .expect("failed to fetch");
     println!("{}", String::from_utf8_lossy(&output.stdout));
 
+    if args.len() == 1 {
+        println!("Template Directory: {}" , config_dir.to_str().unwrap());
+        return;        
+    }
+
     // check if template exists
     let template = &args[1];
     let template_dir = config_dir.join(template);
