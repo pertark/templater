@@ -37,15 +37,15 @@ fn main() {
         println!("{}", String::from_utf8_lossy(&output.stdout));
     }
 
-    // fetch latest changes
-    let output = Command::new("git")
-        .current_dir(&config_dir)
-        .args(&["pull", "origin"])
-        .output()
-        .expect("failed to fetch");
-    println!("{}", String::from_utf8_lossy(&output.stdout));
-
     if args.len() == 1 {
+        // fetch latest changes
+        let output = Command::new("git")
+            .current_dir(&config_dir)
+            .args(&["pull", "origin"])
+            .output()
+            .expect("failed to fetch");
+        println!("{}", String::from_utf8_lossy(&output.stdout));
+
         println!("Template Directory: {}" , config_dir.to_str().unwrap());
         return;        
     }
@@ -59,19 +59,39 @@ fn main() {
         return;
     }
 
-    // copy template to current directory
-    println!("Copying template...");
-    let current_dir = env::current_dir().unwrap();
 
-    // for each file in template_dir, copy to current_dir
-    for entry in template_dir.read_dir().expect("read_dir call failed") {
-        let entry = entry.unwrap();
+    // by default, copy template to current directory
+    let default_target = env::current_dir().unwrap();
+    let mut target_dirs = vec![default_target.as_path()];
+    if args.len() > 2 {
+        target_dirs = args[2..].iter().map(|x| Path::new(x)).collect();
+
+        // create directories if they don't exist
+        for dir in &target_dirs {
+            if !dir.exists() {
+                std::fs::create_dir_all(dir).expect("failed to create directory");
+            }
+        }
+    }
+
+    println!("Copying template...");
+    for dir in target_dirs {
+        copy_template(&template_dir, dir);
+    }
+}
+
+fn copy_template(template_dir: &Path, target_dir: &Path) {
+    for entry in std::fs::read_dir(template_dir).expect("failed to read directory") {
+        let entry = entry.expect("failed to read entry");
         let path = entry.path();
         let file_name = path.file_name().unwrap();
-        let file_name = file_name.to_str().unwrap();
-        let current_dir = current_dir.join(file_name);
-        println!("Copying {} to {}", path.to_str().unwrap(), current_dir.to_str().unwrap());
-        std::fs::copy(path, current_dir).expect("failed to copy");
+        let target_path = target_dir.join(file_name);
+
+        if path.is_dir() {
+            std::fs::create_dir(&target_path).expect("failed to create directory");
+            copy_template(&path, &target_path);
+        } else {
+            std::fs::copy(&path, &target_path).expect("failed to copy file");
+        }
     }
-    
 }
