@@ -78,6 +78,7 @@ fn main() {
     for dir in target_dirs {
         copy_template(&template_dir, dir);
     }
+    println!("Copying complete.");
 }
 
 fn copy_template(template_dir: &Path, target_dir: &Path) {
